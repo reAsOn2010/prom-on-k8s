@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+  <property>
+    <name>yarn.resourcemanager.cluster-id</name>
+    <value>yarncluster</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.zk-address</name>
+    <value>zk-0.myzkcluster:2181,zk-1.myzkcluster:2181,zk-2.myzkcluster:2181</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.ha.enabled</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.ha.rm-ids</name>
+    <value>rm0,rm1</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.hostname.rm0</name>
+    <value>hadoop-resourcemanager-0.myhadoopcluster</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.hostname.rm1</name>
+    <value>hadoop-resourcemanager-1.myhadoopcluster</value>
+  </property>
+</configuration>

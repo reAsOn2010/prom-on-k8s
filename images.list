@@ -1,0 +1,11 @@
+${base}/alertmanager:v0.0
+${base}/event-exporter:v0.0
+${base}/hadoop:test
+${base}/hbase:test
+${base}/hierarchy-exporter:v0.0.3
+${base}/jmx-exporter:v0.1
+${base}/opentsdb:test
+${base}/prometheus:v0.0
+grafana/grafana
+zookeeper:3.4.9
+${base}/google_containers_k8s-dns-kube-dns-amd64:1.11.0

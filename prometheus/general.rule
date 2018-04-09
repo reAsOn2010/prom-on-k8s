@@ -1,0 +1,56 @@
+ALERT MemoryUsageHigh
+    IF sum(container_memory_working_set_bytes{id="/"}) by (instance) / sum(machine_memory_bytes) by (instance) > 0.75
+    FOR 5m
+    LABELS { severity = "warning" }
+    ANNOTATIONS {
+        summary = "Instance {{ $labels.instance }} memory usage high",
+        description = "{{ $labels.instance }} has high memory usage of {{ $value }}",
+    }
+ALERT MemoryUsageHigh
+    IF sum(container_memory_working_set_bytes{id="/"}) by (instance) / sum(machine_memory_bytes) by (instance) > 0.85
+    FOR 5m
+    LABELS { severity = "critical" }
+    ANNOTATIONS {
+        summary = "Instance {{ $labels.instance }} memory usage high",
+        description = "{{ $labels.instance }} has high memory usage of {{ $value }}",
+    }
+ALERT CPUUsageHigh
+    if sum(rate(container_cpu_usage_seconds_total{id="/"}[5m])) by (instance) / sum(machine_cpu_cores) by (instance) > 0.95
+    FOR 5m
+    LABELS { severity = "warning" }
+    ANNOTATIONS {
+        summary = "Instance {{ $labels.instance }} cpu usage high",
+        description = "{{ $labels.instance }} has high cpu usage of {{ $value }}",
+    }
+ALERT CPUUsageHigh
+    if sum(rate(container_cpu_usage_seconds_total{id="/"}[5m])) by (instance) / sum(machine_cpu_cores) by (instance) > 0.99
+    FOR 5m
+    LABELS { severity = "critical" }
+    ANNOTATIONS {
+        summary = "Instance {{ $labels.instance }} cpu usage high",
+        description = "{{ $labels.instance }} has high cpu usage of {{ $value }}",
+    }
+ALERT NetworkUsageHigh
+    if sum(rate(container_network_receive_bytes_total{id="/"}[5m])) by (instance, interface) > 100000000
+    for 5m
+    LABELS { severity = "warning" }
+    ANNOTATIONS {
+        summary = "Instance {{ $labels.instance }} {{ $labels.interface }} usage high",
+        description = "{{ $labels.instance }} {{ $labels.interface }} has high network usage of {{ $value }}",
+    }
+ALERT JournalNodeAbnormal
+    IF hadoop_journal_LastPromisedEpoch < 0
+    FOR 5m
+    LABELS { severity = "critical" }
+    ANNOTATIONS {
+        summary = "Hadoop JournalNode {{ $labels.kubernetes_pod_name }} abnormal",
+        description = "{{ $labels.kubernetes_pod_name }} cannot load journal files, data may corrupted",
+    }
+ALERT KubernetesEvent
+    IF kubernetes_events >= 1
+    FOR 5m
+    LABELS { severity = "warning" }
+    ANNOTATIONS {
+        summary = "{{ $labels.event_namespace }}/{{ $labels.event_name }}'s {{ $labels.event_kind }} abnormal",
+        description = "{{ $labels.event_namespace }}/{{ $labels.event_name }}'s {{ $labels.event_kind }}, subobject: {{ $labels.event_subobject }}(may not exist), {{ $labels.event_reason }} for 5m, event from {{ $labels.event_source }}",
+    }

@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-namenode-1
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-nn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-nn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+    prometheus.io/scrape: "true"
+spec:
+  hostname: hadoop-namenode-1
+  subdomain: myhadoopcluster
+  #restartPolicy: Never
+  containers:
+    - name: namenode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - name: rpc
+          containerPort: 8020
+        - name: http
+          containerPort: 50070
+        - name: https
+          containerPort: 50470
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-nn
+          mountPath: /var/hdfs/name
+      env:
+        - name: HDFS_INIT_NAMENODE
+          value: "false"
+      args:
+        - hnamenode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/namenode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-nn
+      emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config

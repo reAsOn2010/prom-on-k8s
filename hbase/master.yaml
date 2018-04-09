@@ -1,0 +1,165 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hbase-master
+  namespace: default
+spec:
+  ports:
+  - name: http
+    nodePort: 32180
+    port: 16010
+    targetPort: 16010
+  selector:
+    hbase-component: myhbasecluster-master
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myhbasecluster
+  namespace: default
+spec:
+  ports:
+  - port: 16000
+    name: rpc
+  - port: 16010
+    name: web
+  clusterIP: None
+  selector:
+    hbase-cluster: myhbasecluster
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hbase-master-0
+  namespace: default
+  labels:
+    hbase-cluster: myhbasecluster
+    hbase-component: myhbasecluster-master
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hbase-cluster",
+                  "operator": "In",
+                  "values": ["myhbasecluster-master"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+    prometheus.io/scrape: "true"
+spec:
+  hostname: hbase-master-0
+  subdomain: myhbasecluster
+  restartPolicy: Never
+  containers:
+    - image: ${base}/hbase:test
+      imagePullPolicy: Always
+      name: hbase-master
+      ports:
+        - containerPort: 16000
+          name: rpc
+        - containerPort: 16010
+          name: web
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hbase-conf
+          mountPath: /mnt/hbase/conf
+      args:
+        - master
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/hmaster.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: hbase-conf
+      configMap:
+        name: hbase-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hbase-master-1
+  namespace: default
+  labels:
+    hbase-cluster: myhbasecluster
+    hbase-component: myhbasecluster-master
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hbase-cluster",
+                  "operator": "In",
+                  "values": ["myhbasecluster-master"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+    prometheus.io/scrape: "true"
+spec:
+  hostname: hbase-master-1
+  subdomain: myhbasecluster
+  restartPolicy: Never
+  containers:
+    - image: ${base}/hbase:test
+      imagePullPolicy: Always
+      name: hbase-master
+      ports:
+        - containerPort: 16000
+          name: rpc
+        - containerPort: 16010
+          name: web
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hbase-conf
+          mountPath: /mnt/hbase/conf
+      args:
+        - master
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/hmaster.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: hbase-conf
+      configMap:
+        name: hbase-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config

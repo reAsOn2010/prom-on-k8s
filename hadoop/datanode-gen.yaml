@@ -1,0 +1,700 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-datanode-0
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-dn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-dn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+spec:
+  hostname: hadoop-datanode-0
+  subdomain: myhadoopcluster
+  restartPolicy: Never
+  containers:
+    - name: datanode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 50010
+          name: rpc
+        - containerPort: 50020
+          name: ipc
+        - containerPort: 50075
+          name: http
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-dn
+          mountPath: /var/hdfs/data
+      args:
+        - datanode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/datanode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-dn
+      # hostPath:
+      #   path: /mnt/hdfs/data
+      emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-datanode-1
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-dn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-dn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+spec:
+  hostname: hadoop-datanode-1
+  subdomain: myhadoopcluster
+  restartPolicy: Never
+  containers:
+    - name: datanode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 50010
+          name: rpc
+        - containerPort: 50020
+          name: ipc
+        - containerPort: 50075
+          name: http
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-dn
+          mountPath: /var/hdfs/data
+      args:
+        - datanode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/datanode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-dn
+      # hostPath:
+      #   path: /mnt/hdfs/data
+      emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-datanode-2
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-dn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-dn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+spec:
+  hostname: hadoop-datanode-2
+  subdomain: myhadoopcluster
+  restartPolicy: Never
+  containers:
+    - name: datanode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 50010
+          name: rpc
+        - containerPort: 50020
+          name: ipc
+        - containerPort: 50075
+          name: http
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-dn
+          mountPath: /var/hdfs/data
+      args:
+        - datanode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/datanode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-dn
+      # hostPath:
+      #   path: /mnt/hdfs/data
+      emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-datanode-3
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-dn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-dn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+spec:
+  hostname: hadoop-datanode-3
+  subdomain: myhadoopcluster
+  restartPolicy: Never
+  containers:
+    - name: datanode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 50010
+          name: rpc
+        - containerPort: 50020
+          name: ipc
+        - containerPort: 50075
+          name: http
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-dn
+          mountPath: /var/hdfs/data
+      args:
+        - datanode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/datanode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-dn
+      # hostPath:
+      #   path: /mnt/hdfs/data
+      emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-datanode-4
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-dn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-dn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+spec:
+  hostname: hadoop-datanode-4
+  subdomain: myhadoopcluster
+  restartPolicy: Never
+  containers:
+    - name: datanode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 50010
+          name: rpc
+        - containerPort: 50020
+          name: ipc
+        - containerPort: 50075
+          name: http
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-dn
+          mountPath: /var/hdfs/data
+      args:
+        - datanode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/datanode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-dn
+      # hostPath:
+      #   path: /mnt/hdfs/data
+      emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-datanode-5
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-dn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-dn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+spec:
+  hostname: hadoop-datanode-5
+  subdomain: myhadoopcluster
+  restartPolicy: Never
+  containers:
+    - name: datanode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 50010
+          name: rpc
+        - containerPort: 50020
+          name: ipc
+        - containerPort: 50075
+          name: http
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-dn
+          mountPath: /var/hdfs/data
+      args:
+        - datanode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/datanode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-dn
+      # hostPath:
+      #   path: /mnt/hdfs/data
+      emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-datanode-6
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-dn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-dn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+spec:
+  hostname: hadoop-datanode-6
+  subdomain: myhadoopcluster
+  restartPolicy: Never
+  containers:
+    - name: datanode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 50010
+          name: rpc
+        - containerPort: 50020
+          name: ipc
+        - containerPort: 50075
+          name: http
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-dn
+          mountPath: /var/hdfs/data
+      args:
+        - datanode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/datanode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-dn
+      # hostPath:
+      #   path: /mnt/hdfs/data
+      emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-datanode-7
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-dn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-dn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+spec:
+  hostname: hadoop-datanode-7
+  subdomain: myhadoopcluster
+  restartPolicy: Never
+  containers:
+    - name: datanode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 50010
+          name: rpc
+        - containerPort: 50020
+          name: ipc
+        - containerPort: 50075
+          name: http
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-dn
+          mountPath: /var/hdfs/data
+      args:
+        - datanode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/datanode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-dn
+      # hostPath:
+      #   path: /mnt/hdfs/data
+      emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-datanode-8
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-dn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-dn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+spec:
+  hostname: hadoop-datanode-8
+  subdomain: myhadoopcluster
+  restartPolicy: Never
+  containers:
+    - name: datanode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 50010
+          name: rpc
+        - containerPort: 50020
+          name: ipc
+        - containerPort: 50075
+          name: http
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-dn
+          mountPath: /var/hdfs/data
+      args:
+        - datanode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/datanode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-dn
+      # hostPath:
+      #   path: /mnt/hdfs/data
+      emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-datanode-9
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-dn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-dn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+spec:
+  hostname: hadoop-datanode-9
+  subdomain: myhadoopcluster
+  restartPolicy: Never
+  containers:
+    - name: datanode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 50010
+          name: rpc
+        - containerPort: 50020
+          name: ipc
+        - containerPort: 50075
+          name: http
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-dn
+          mountPath: /var/hdfs/data
+      args:
+        - datanode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/datanode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-dn
+      # hostPath:
+      #   path: /mnt/hdfs/data
+      emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---

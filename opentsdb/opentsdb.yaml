@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mytsdbcluster
+  namespace: default
+spec:
+  ports:
+    - port: 4242
+      name: http
+  # clusterIP: None
+  selector:
+    opentsdb-cluster: mytsdbcluster
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    opentsdb-cluster: mytsdbcluster
+  name: opentsdb
+  namespace: default
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      opentsdb-cluster: mytsdbcluster
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        opentsdb-cluster: mytsdbcluster
+    spec:
+      subdomain: mytsdbcluster
+      containers:
+        - name: opentsdb
+          image: ${base}/opentsdb:test
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4242
+              name: http
+          volumeMounts:
+            - name: hadoop-conf
+              mountPath: /mnt/hadoop/conf
+            - name: hbase-conf
+              mountPath: /mnt/hbase/conf
+            - name: opentsdb-conf
+              mountPath: /mnt/opentsdb/conf
+          args:
+            - tsd
+      volumes:
+        - name: hadoop-conf
+          configMap:
+            defaultMode: 420
+            name: hadoop-config
+        - name: hbase-conf
+          configMap:
+            defaultMode: 420
+            name: hbase-config
+        - name: opentsdb-conf
+          configMap:
+            defaultMode: 420
+            name: opentsdb-config

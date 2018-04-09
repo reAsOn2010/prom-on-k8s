@@ -1,0 +1,235 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: myhadoopcluster
+  namespace: default
+spec:
+  clusterIP: None
+  selector:
+    hadoop-cluster: myhadoopcluster
+  ports:
+    - name: http
+      port: 50070
+      targetPort: 50070
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-journalnode-0
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-jn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-jn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+    prometheus.io/scrape: "true"
+spec:
+  restartPolicy: Never
+  hostname: hadoop-journalnode-0
+  subdomain: myhadoopcluster
+  nodeSelector:
+    kubernetes.io/hostname: kube-node-40
+  containers:
+    - name: journalnode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 8485
+          name: rpc
+        - containerPort: 8480
+          name: http
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-jn
+          mountPath: /home/hadoop/journaldata
+      env:
+        - name: HADOOP_OPTS
+          value: "-Dcom.sun.management.jmxremote.port=8010"
+      args:
+        - journalnode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/journalnode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-jn
+      hostPath:
+        path: /var/hadoop/journaldata
+      # emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-journalnode-1
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-jn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-jn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+    prometheus.io/scrape: "true"
+spec:
+  restartPolicy: Never
+  hostname: hadoop-journalnode-1
+  subdomain: myhadoopcluster
+  nodeSelector:
+    kubernetes.io/hostname: kube-node-50
+  containers:
+    - name: journalnode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 8485
+          name: rpc
+        - containerPort: 8480
+          name: http
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-jn
+          mountPath: /home/hadoop/journaldata
+      env:
+        - name: HADOOP_OPTS
+          value: "-Dcom.sun.management.jmxremote.port=8010"
+      args:
+        - journalnode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/journalnode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-jn
+      hostPath:
+        path: /var/hadoop/journaldata
+      # emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-journalnode-2
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-jn
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-jn"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+    prometheus.io/scrape: "true"
+spec:
+  restartPolicy: Never
+  hostname: hadoop-journalnode-2
+  subdomain: myhadoopcluster
+  nodeSelector:
+    kubernetes.io/hostname: kube-node-60
+  containers:
+    - name: journalnode
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 8485
+          name: rpc
+        - containerPort: 8480
+          name: http
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hadoop-jn
+          mountPath: /home/hadoop/journaldata
+      env:
+        - name: HADOOP_OPTS
+          value: "-Dcom.sun.management.jmxremote.port=8010"
+      args:
+        - journalnode
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/journalnode.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-jn
+      hostPath:
+        path: /var/hadoop/journaldata
+      # emptyDir: {}
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config

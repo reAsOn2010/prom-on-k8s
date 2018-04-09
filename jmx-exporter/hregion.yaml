@@ -1,0 +1,18 @@
+---
+hostPort: 127.0.0.1:10102
+lowercaseOutputName: false
+lowercaseOutputLabelNames: false
+whitelistObjectNames: ["Hadoop:*"]
+rules:
+  - pattern: "^Hadoop<service=HBase, name=(\\w+), sub=IPC><>(\\w+)"
+    name: "hbase_ipc_$2"
+    labels:
+      role: "$1"
+  - pattern: "^Hadoop<service=HBase, name=(\\w+), sub=Server><>(\\w+)"
+    name: "hbase_server_$2"
+    labels:
+      role: "$1"
+  - pattern: "^Hadoop<service=HBase, name=(\\w+), sub=WAL><>(\\w+)"
+    name: "hbase_wal_$2"
+    labels:
+      role: "$1"

@@ -1,0 +1,31 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: root
+  routes:
+    - receiver: team1
+      match_re:
+        severity: ".+"
+      continue: true
+    - receiver: team2
+      match:
+        severity: critical
+      continue: true
+
+# Inhibition rules allow to mute a set of alerts given that another alert is
+# firing.
+# We use this to mute any warning-level notifications if the same alert is
+# already critical.
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    # Apply inhibition if the alertname is the same.
+    equal: ['alertname']
+
+receivers:
+  - name: root
+  - name: team1
+  - name: team2

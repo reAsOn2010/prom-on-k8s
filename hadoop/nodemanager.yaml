@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-nodemanager-0
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-nm
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-nm"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+spec:
+  hostname: hadoop-nodemanager-0
+  subdomain: myhadoopcluster
+  restartPolicy: Never
+  containers:
+    - name: nodemanager
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+      - containerPort: 8042
+        name: web
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+      args:
+        - nodemanager
+  volumes:
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hadoop-nodemanager-1
+  namespace: default
+  labels:
+    hadoop-cluster: myhadoopcluster
+    hadoop-component: myhadoopcluster-nm
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hadoop-component",
+                  "operator": "In",
+                  "values": ["myhadoopcluster-nm"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+spec:
+  hostname: hadoop-nodemanager-1
+  subdomain: myhadoopcluster
+  restartPolicy: Never
+  containers:
+    - name: nodemanager
+      image: ${base}/hadoop:test
+      imagePullPolicy: Always
+      ports:
+      - containerPort: 8042
+        name: web
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+      args:
+        - nodemanager
+  volumes:
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config

@@ -1,0 +1,203 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myzkcluster
+  namespace: default
+spec:
+  ports:
+  - port: 2181
+    name: zk
+  - port: 2888
+    name: server
+  - port: 3888
+    name: leader-election
+  clusterIP: None
+  selector:
+    zk-cluster: myzkcluster
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: zk-0
+  namespace: default
+  labels:
+    zk-cluster: myzkcluster
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "zk-cluster",
+                  "operator": "In",
+                  "values": ["myzkcluster"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+    prometheus.io/scrape: "true"
+spec:
+  hostname: zk-0
+  subdomain: myzkcluster
+  restartPolicy: Never
+  containers:
+    - name: zookeeper
+      image: zookeeper:3.4.9
+      ports:
+        - containerPort: 2181
+          name: zk
+        - containerPort: 2888
+          name: server
+        - containerPort: 3888
+          name: leader-election
+      env:
+        - name: ZOO_MY_ID
+          value: "0"
+        - name: ZOO_SERVERS
+          value: server.0=zk-0.myzkcluster.default.svc.cluster.local:2888:3888 server.1=zk-1.myzkcluster.default.svc.cluster.local:2888:3888 server.2=zk-2.myzkcluster.default.svc.cluster.local:2888:3888
+        - name: JMXPORT
+          value: "1234"
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/zookeeper.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: zk-1
+  namespace: default
+  labels:
+    zk-cluster: myzkcluster
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "zk-cluster",
+                  "operator": "In",
+                  "values": ["myzkcluster"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+    prometheus.io/scrape: "true"
+spec:
+  hostname: zk-1
+  subdomain: myzkcluster
+  restartPolicy: Never
+  containers:
+    - name: zookeeper
+      image: zookeeper:3.4.9
+      ports:
+        - containerPort: 2181
+          name: zk
+        - containerPort: 2888
+          name: server
+        - containerPort: 3888
+          name: leader-election
+      env:
+        - name: ZOO_MY_ID
+          value: "1"
+        - name: ZOO_SERVERS
+          value: server.0=zk-0.myzkcluster.default.svc.cluster.local:2888:3888 server.1=zk-1.myzkcluster.default.svc.cluster.local:2888:3888 server.2=zk-2.myzkcluster.default.svc.cluster.local:2888:3888
+        - name: JMXPORT
+          value: "1234"
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/zookeeper.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: zk-2
+  namespace: default
+  labels:
+    zk-cluster: myzkcluster
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "zk-cluster",
+                  "operator": "In",
+                  "values": ["myzkcluster"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+    prometheus.io/scrape: "true"
+spec:
+  hostname: zk-2
+  subdomain: myzkcluster
+  restartPolicy: Never
+  containers:
+    - name: zookeeper
+      image: zookeeper:3.4.9
+      ports:
+        - containerPort: 2181
+          name: zk
+        - containerPort: 2888
+          name: server
+        - containerPort: 3888
+          name: leader-election
+      env:
+        - name: ZOO_MY_ID
+          value: "2"
+        - name: ZOO_SERVERS
+          value: server.0=zk-0.myzkcluster.default.svc.cluster.local:2888:3888 server.1=zk-1.myzkcluster.default.svc.cluster.local:2888:3888 server.2=zk-2.myzkcluster.default.svc.cluster.local:2888:3888
+        - name: JMXPORT
+          value: "1234"
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/zookeeper.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config

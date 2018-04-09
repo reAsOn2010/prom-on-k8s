@@ -1,0 +1,358 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-top
+  namespace: kube-system
+spec:
+  clusterIP: None
+  ports:
+  - name: prom
+    port: 9090
+    targetPort: 9090
+  - name: am
+    port: 9093
+    targetPort: 9093
+  selector:
+    app.type: prometheus-top
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-nodeport
+  namespace: kube-system
+spec:
+  ports:
+  - name: prom
+    nodePort: 32110
+    port: 9090
+    targetPort: 9090
+  - name: am
+    nodePort: 32111
+    port: 9093
+    targetPort: 9093
+  selector:
+    app.type: prometheus-top
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-pods
+  namespace: kube-system
+spec:
+  clusterIP: None
+  ports:
+  - name: prom
+    port: 9090
+    targetPort: 9090
+  selector:
+    app.type: prometheus-pods
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-node-0
+  namespace: kube-system
+spec:
+  clusterIP: None
+  ports:
+  - name: prom
+    port: 9090
+    targetPort: 9090
+  selector:
+    app.type: prometheus-node-0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-node-1
+  namespace: kube-system
+spec:
+  clusterIP: None
+  ports:
+  - name: prom
+    port: 9090
+    targetPort: 9090
+  selector:
+    app.type: prometheus-node-1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-node-2
+  namespace: kube-system
+spec:
+  clusterIP: None
+  ports:
+  - name: prom
+    port: 9090
+    targetPort: 9090
+  selector:
+    app.type: prometheus-node-2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-node-3
+  namespace: kube-system
+spec:
+  clusterIP: None
+  ports:
+  - name: prom
+    port: 9090
+    targetPort: 9090
+  selector:
+    app.type: prometheus-node-3
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: prometheus-top
+  namespace: kube-system
+  labels:
+    app.type: prometheus-top
+spec:
+  containers:
+    - name: prometheus
+      image: ${base}/prometheus:v0.0
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 9090
+          name: web
+      volumeMounts:
+        - name: prometheus-fed-config
+          mountPath: /etc/prometheus
+      args:
+        - "-config.file=/etc/prometheus/prometheus-top.yml"
+        - "-storage.local.path=/prometheus"
+        - "-web.console.libraries=/usr/share/prometheus/console_libraries"
+        - "-web.console.templates=/usr/share/prometheus/consoles"
+        - "-log.level=error"
+        # - "-storage.remote.opentsdb-url=http://mytsdbcluster.default:4242"
+        - "-alertmanager.url=http://localhost:9093"
+        # - "-web.external-url=http://${base_url}:32100/"
+    - name: alertmanager
+      image: ${base}/alertmanager:v0.0
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 9093
+          name: alert
+      volumeMounts:
+        - name: alertmanager-fed-config
+          mountPath: /etc/alertmanager
+      args:
+        - "-config.file=/etc/alertmanager/alertmanager.yml"
+        # - "-web.external-url=http://${base_url}:32101/"
+    - name: alert-discovery
+      image: ${base}/alert-discovery:v0.0
+      imagePullPolicy: Always
+      args:
+        - "--configmap-ns=kube-system"
+        - "--configmap-name=prometheus-fed-config"
+  volumes:
+    - name: prometheus-fed-config
+      configMap:
+        name: prometheus-fed-config
+    - name: alertmanager-fed-config
+      configMap:
+        name: alertmanager-fed-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: prometheus-pods
+  namespace: kube-system
+  labels:
+    app.type: prometheus-pods
+spec:
+  containers:
+    - name: prometheus
+      image: ${base}/prometheus:v0.0
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 9090
+          name: web
+      volumeMounts:
+        - name: prometheus-fed-config
+          mountPath: /etc/prometheus
+      args:
+        - "-config.file=/etc/prometheus/prometheus-pods.yml"
+        - "-storage.local.path=/prometheus"
+        - "-web.console.libraries=/usr/share/prometheus/console_libraries"
+        - "-web.console.templates=/usr/share/prometheus/consoles"
+        - "-storage.remote.opentsdb-url=http://mytsdbcluster.default:4242"
+        - "-log.level=error"
+        # - "-alertmanager.url=http://localhost:9093"
+        # - "-web.external-url=http://${base_url}:32100/"
+    - name: event-exporter
+      image: ${base}/event-exporter:v0.0
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 9100
+          name: event
+      args:
+        - "--web.listen-address=:9100"
+  volumes:
+    - name: prometheus-fed-config
+      configMap:
+        name: prometheus-fed-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: prometheus-node-0
+  namespace: kube-system
+  labels:
+    app.type: prometheus-node-0
+spec:
+  containers:
+    - name: prometheus
+      image: ${base}/prometheus:v0.0
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 9090
+          name: web
+      volumeMounts:
+        - name: prometheus-fed-config
+          mountPath: /etc/prometheus
+      args:
+        - "-config.file=/etc/prometheus/prometheus-0.yml"
+        - "-storage.local.path=/prometheus"
+        - "-web.console.libraries=/usr/share/prometheus/console_libraries"
+        - "-web.console.templates=/usr/share/prometheus/consoles"
+        - "-storage.remote.opentsdb-url=http://mytsdbcluster.default:4242"
+        - "-log.level=error"
+        # - "-alertmanager.url=http://localhost:9093"
+        # - "-web.external-url=http://${base_url}:32100/"
+    - name: hierarchy-exporter
+      image: ${base}/hierarchy-exporter:v0.0.4
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 9101
+          name: hierarchy
+      args:
+        - "--web.listen-address=:9101"
+  volumes:
+    - name: prometheus-fed-config
+      configMap:
+        name: prometheus-fed-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: prometheus-node-1
+  namespace: kube-system
+  labels:
+    app.type: prometheus-node-1
+spec:
+  containers:
+    - name: prometheus
+      image: ${base}/prometheus:v0.0
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 9090
+          name: web
+      volumeMounts:
+        - name: prometheus-fed-config
+          mountPath: /etc/prometheus
+      args:
+        - "-config.file=/etc/prometheus/prometheus-1.yml"
+        - "-storage.local.path=/prometheus"
+        - "-web.console.libraries=/usr/share/prometheus/console_libraries"
+        - "-web.console.templates=/usr/share/prometheus/consoles"
+        - "-storage.remote.opentsdb-url=http://mytsdbcluster.default:4242"
+        - "-log.level=error"
+        # - "-alertmanager.url=http://localhost:9093"
+        # - "-web.external-url=http://${base_url}:32100/"
+    - name: hierarchy-exporter
+      image: ${base}/hierarchy-exporter:v0.0.4
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 9101
+          name: hierarchy
+      args:
+        - "--web.listen-address=:9101"
+  volumes:
+    - name: prometheus-fed-config
+      configMap:
+        name: prometheus-fed-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: prometheus-node-2
+  namespace: kube-system
+  labels:
+    app.type: prometheus-node-2
+spec:
+  containers:
+    - name: prometheus
+      image: ${base}/prometheus:v0.0
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 9090
+          name: web
+      volumeMounts:
+        - name: prometheus-fed-config
+          mountPath: /etc/prometheus
+      args:
+        - "-config.file=/etc/prometheus/prometheus-2.yml"
+        - "-storage.local.path=/prometheus"
+        - "-web.console.libraries=/usr/share/prometheus/console_libraries"
+        - "-web.console.templates=/usr/share/prometheus/consoles"
+        - "-storage.remote.opentsdb-url=http://mytsdbcluster.default:4242"
+        - "-log.level=error"
+        # - "-alertmanager.url=http://localhost:9093"
+        # - "-web.external-url=http://${base_url}:32100/"
+    - name: hierarchy-exporter
+      image: ${base}/hierarchy-exporter:v0.0.4
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 9101
+          name: hierarchy
+      args:
+        - "--web.listen-address=:9101"
+  volumes:
+    - name: prometheus-fed-config
+      configMap:
+        name: prometheus-fed-config
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: prometheus-node-3
+  namespace: kube-system
+  labels:
+    app.type: prometheus-node-3
+spec:
+  containers:
+    - name: prometheus
+      image: ${base}/prometheus:v0.0
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 9090
+          name: web
+      volumeMounts:
+        - name: prometheus-fed-config
+          mountPath: /etc/prometheus
+      args:
+        - "-config.file=/etc/prometheus/prometheus-3.yml"
+        - "-storage.local.path=/prometheus"
+        - "-web.console.libraries=/usr/share/prometheus/console_libraries"
+        - "-web.console.templates=/usr/share/prometheus/consoles"
+        - "-storage.remote.opentsdb-url=http://mytsdbcluster.default:4242"
+        - "-log.level=error"
+        # - "-alertmanager.url=http://localhost:9093"
+        # - "-web.external-url=http://${base_url}:32100/"
+    - name: hierarchy-exporter
+      image: ${base}/hierarchy-exporter:v0.0.4
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 9101
+          name: hierarchy
+      args:
+        - "--web.listen-address=:9101"
+  volumes:
+    - name: prometheus-fed-config
+      configMap:
+        name: prometheus-fed-config

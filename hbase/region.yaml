@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hbase-region-0
+  namespace: default
+  labels:
+    hbase-cluster: myhbasecluster
+    hbase-component: myhbasecluster-region
+  annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+        {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingRequiredDuringExecution": [{
+              "labelSelector": {
+                "matchExpressions": [{
+                  "key": "hbase-cluster",
+                  "operator": "In",
+                  "values": ["myhbasecluster-region"]
+                }]
+              },
+              "topologyKey": "kubernetes.io/hostname"
+            }]
+          }
+        }
+    prometheus.io/scrape: "true"
+spec:
+  hostname: hbase-region-0
+  subdomain: myhbasecluster
+  restartPolicy: Never
+  containers:
+    - image: ${base}/hbase:test
+      imagePullPolicy: Always
+      name: hbase-region
+      ports:
+        - containerPort: 16020
+          name: rpc
+        - containerPort: 16030
+          name: web
+      volumeMounts:
+        - name: hadoop-conf
+          mountPath: /mnt/hadoop/conf
+        - name: hbase-conf
+          mountPath: /mnt/hbase/conf
+      args:
+        - region
+    - name: exporter
+      image: ${base}/jmx-exporter:v0.1
+      imagePullPolicy: Always
+      args:
+        - "9102"
+        - "/conf/hregion.yaml"
+      ports:
+        - containerPort: 9102
+          name: metrics
+      volumeMounts:
+        - name: jmx-exporter-conf
+          mountPath: /conf
+  volumes:
+    - name: hadoop-conf
+      configMap:
+        name: hadoop-config
+    - name: hbase-conf
+      configMap:
+        name: hbase-config
+    - name: jmx-exporter-conf
+      configMap:
+        name: jmx-exporter-config

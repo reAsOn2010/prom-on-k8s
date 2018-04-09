@@ -1,0 +1,10 @@
+---
+hostPort: 127.0.0.1:8006
+lowercaseOutputName: false
+lowercaseOutputLabelNames: false
+whitelistObjectNames: ["Hadoop:*"]
+rules:
+  - pattern: "^Hadoop<service=(\\w+), name=DataNodeActivity-([0-9a-zA-Z.-]+)><>(\\w+)"
+    name: "hadoop_activity_$3"
+    labels:
+      role: "$1"
